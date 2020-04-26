@@ -1,0 +1,32 @@
+.waveform-synthesizer {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  grid-template-rows: 100px repeat(3, auto);
+  height: 100vh;
+  gap: 1px;
+  background-color: black;
+  
+  >div {
+    background-color: white;
+  }
+  
+  .master {
+    grid-column: 1 / span 3;
+    grid-row: 1;
+  }
+
+  .waveform-editor {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .frequency-graph {
+    grid-column: 1 / span 3;
+    grid-row: 3;
+  }
+
+  .midi-keyboard {
+    grid-column: 1 / span 3;
+    grid-row: 4;
+  }
+}
