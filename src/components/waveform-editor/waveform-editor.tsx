@@ -3,15 +3,18 @@ import * as React from 'react';
 import { clamp } from 'util/clamp';
 
 interface WaveformEditorState {
-  waveformBuffer: Array<number>;
   editing: boolean;
+}
+
+interface WaveformEditorProps {
+  waveformBuffer: Array<number>;
+  onWaveformBufferChange: Function;
 }
 
 /**
  * A component containing an editable canvas to create and export a waveform.
  */
-export class WaveformEditor extends React.Component<{}, WaveformEditorState> {
-  static waveBufferLength = 100;
+export class WaveformEditor extends React.Component<WaveformEditorProps, WaveformEditorState> {
   private canvasRef: React.RefObject<HTMLCanvasElement>;
 
   constructor(props: any) {
@@ -20,23 +23,8 @@ export class WaveformEditor extends React.Component<{}, WaveformEditorState> {
     this.canvasRef = React.createRef();
 
     this.state = {
-      waveformBuffer: this.initWaveformBuffer(),
       editing: false
     }
-  }
-
-  /**
-   * Initialize a waveform buffer of the default size and fill it with a perfect sine wave.
-   * @returns An array of numbers representing the initialized waveform.
-   */
-  initWaveformBuffer(): Array<number> {
-    const newBuffer = new Array<number>(WaveformEditor.waveBufferLength);
-
-    for(let i = 0; i < newBuffer.length; i++) {
-      newBuffer[i] = Math.sin(i * (Math.PI * 2 / WaveformEditor.waveBufferLength));
-    }
-
-    return newBuffer;
   }
 
   /**
@@ -45,7 +33,7 @@ export class WaveformEditor extends React.Component<{}, WaveformEditorState> {
   drawWaveform() {
     const canvas = this.canvasRef.current as HTMLCanvasElement;
     const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-    const waveformBuffer = this.state.waveformBuffer;
+    const waveformBuffer = this.props.waveformBuffer;
     ctx.imageSmoothingEnabled = false;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -98,19 +86,17 @@ export class WaveformEditor extends React.Component<{}, WaveformEditorState> {
     const height = canvas.getBoundingClientRect().height;
 
     const x = clamp(
-      Math.floor(pointX / width * this.state.waveformBuffer.length),
+      Math.floor(pointX / width * this.props.waveformBuffer.length),
       0,
-      WaveformEditor.waveBufferLength - 1);
+      this.props.waveformBuffer.length - 1);
     
-    const newBuffer = this.state.waveformBuffer;
+    const newBuffer = this.props.waveformBuffer;
     newBuffer[x] = clamp(
       (pointY / height) * 2 - 1,
       -1,
       1);
 
-    this.setState({
-      waveformBuffer: newBuffer
-    });
+    this.props.onWaveformBufferChange(newBuffer);
   }
 
   //#region Lifecycle functions
