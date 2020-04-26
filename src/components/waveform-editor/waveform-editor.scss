@@ -1,0 +1,11 @@
+.editor {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+
+  canvas {
+    height: 100%;
+    image-rendering: pixelated;
+    background-color: white;
+  }
+}
