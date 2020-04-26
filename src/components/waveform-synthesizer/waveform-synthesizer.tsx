@@ -31,13 +31,13 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
    */
   initMasterGainNode(): GainNode {
     const gainNode = this.audioContext.createGain();
-    gainNode.gain.value = 0.5;
+    gainNode.gain.value = 0.1;
     gainNode.connect(this.audioContext.destination);
     return gainNode;
   }
 
   /**
-   * Initialize an AudioBufferSourceNode which will be filled with the waveform at a magic frequency.
+   * Initialize an AudioBufferSourceNode which will be filled with the waveform and played at the desired frequency.
    * It will be connected to the masterGainNode, so that should exist before this function is called.
    */
   initAudiobufferSource(): AudioBufferSourceNode {
@@ -45,37 +45,27 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
     audioBufferSourceNode.connect(this.masterGainNode);
     audioBufferSourceNode.loop = true;
 
-    const buffer = this.audioContext.createBuffer(1, this.audioContext.sampleRate, this.audioContext.sampleRate);
-    const bufferData = buffer.getChannelData(0);
+    const waveformFrequency = this.audioContext.sampleRate / WaveformSynthesizer.waveBufferLength;
+    const targetFrequency = 261.63;
+    audioBufferSourceNode.playbackRate.value = targetFrequency / waveformFrequency;
 
-    this.fillAudioBuffer(bufferData);
-
-    audioBufferSourceNode.buffer = buffer;
+    audioBufferSourceNode.buffer = this.createWaveformBuffer();
 
     return audioBufferSourceNode;
   }
 
   /**
-   * Fill an AudioBuffer with the waveform from the state, at a magic frequency. 
-   * This function assumes that the audioBuffer is 1 second long, the sample rate does not matter.
-   * @param audioBuffer The audiobuffer that should be filled.
+   * Create an AudioBuffer from the waveform in state.
    */
-  fillAudioBuffer(audioBuffer: Float32Array) {
-    const frequency = 440;
-    const waveformRatio = this.audioContext.sampleRate / frequency;
+  createWaveformBuffer(): AudioBuffer {
+    const buffer = this.audioContext.createBuffer(1, WaveformSynthesizer.waveBufferLength, this.audioContext.sampleRate);
+    const bufferData = buffer.getChannelData(0);
 
-    for (let i = 0; i < audioBuffer.length; i++) {
-      const waveformPartial = ((i / waveformRatio) * this.state.waveform.length) % this.state.waveform.length;
-      const startFrameIndex = Math.floor(waveformPartial);
-      const endFrameIndex = (startFrameIndex + 1) % this.state.waveform.length;
-      const leftover = waveformPartial % 1;
-
-      const valueA = this.state.waveform[startFrameIndex];
-      const valueB = this.state.waveform[endFrameIndex];
-
-      const result = (valueB - valueA) * leftover + valueA;
-      audioBuffer[i] = result;
+    for (let i = 0; i < WaveformSynthesizer.waveBufferLength; i++) {
+      bufferData[i] = this.state.waveform[i];
     }
+
+    return buffer;
   }
 
   onWaveFormBufferChange = (waveform: Array<number>) => {
