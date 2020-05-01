@@ -2,6 +2,7 @@ import './waveform-synthesizer.scss';
 import * as React from 'react';
 import { WaveformEditor } from 'components/waveform-editor/waveform-editor';
 import { initSineWaveform } from 'util/waveform';
+import { MidiKeyboard } from 'components/midi-keyboard/midi-keyboard';
 
 interface WaveformSynthesizerState {
   waveform: Array<number>;
@@ -79,6 +80,10 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
     this.audioBufferSourceNode.start();
   }
 
+  playNote = (event: any) => {
+    console.log(event);
+  }
+
   //#region Lifecycle functions
   componentDidMount() {
     this.audioBufferSourceNode.start();
@@ -99,7 +104,10 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
           onWaveformBufferChange={this.onWaveFormBufferChange}/>
         </div>
       <div className='frequency-graph'><label>Frequency graph placeholder</label></div>
-      <div className='midi-keyboard'><label>Midi keyboard placeholder</label></div>
+      <div className='midi-keyboard'>
+        <MidiKeyboard 
+          onPlayNote={this.playNote}/>
+      </div>
     </div>;
   }
 }
