@@ -6,47 +6,37 @@ interface MidiKeyboardProps {
   onMidiMessage: Function
 }
 
-interface MidiKeyboardState {
-  activeNotes: Array<number>;
-}
-
 const midiNoteOn = 144;
 const midiNoteOff = 128;
 
-export class MidiKeyboard extends React.Component<MidiKeyboardProps, MidiKeyboardState> {
+export class MidiKeyboard extends React.Component<MidiKeyboardProps, {}> {
+  private keyboardKeys: Array<number>;
+  private firstKey = 21;
 
   constructor(props: MidiKeyboardProps) {
     super(props)
 
-    this.state = {
-      activeNotes: new Array<number>()
+    this.keyboardKeys = new Array(87);
+    for(let i = 0; i < 87; i++) {
+      this.keyboardKeys[i] = i;
     }
   }
 
-  toggleNote = (note: number) => {
-    if (this.state.activeNotes.some(n => n === note)) {
-      this.props.onMidiMessage(this.createMidiMessage([midiNoteOff, note]));
-      this.setState({
-        activeNotes: this.state.activeNotes.filter(n => n != note)
-      })
-    } else {
-      this.props.onMidiMessage(this.createMidiMessage([midiNoteOn, note, 127])); // 127 is max velocity
-      this.setState({
-        activeNotes: [...this.state.activeNotes, note]
-      })
-    }
-  }
-
-  createMidiMessage(data: any) {
-    return {
-      data: data
-    }
+  toggleNote = (key: number, state: boolean) => {
+    this.props.onMidiMessage({
+      data: [
+        state ? midiNoteOn : midiNoteOff,
+        key + this.firstKey, // 21 is the first note on our keyboard (C0)
+        127 // Max velocity
+      ]
+    });
   }
 
   render() {
     return <div className="keyboard">
-      <MidiKeyboardKey onToggleNote={() => this.toggleNote(50)}/>
-      <MidiKeyboardKey onToggleNote={() => this.toggleNote(100)}/>
+      {this.keyboardKeys.map((key) => 
+        <MidiKeyboardKey key={key} note={key + this.firstKey} onToggleNote={(state: boolean) => this.toggleNote(key, state)}/>
+      )}
     </div>
   }
 }

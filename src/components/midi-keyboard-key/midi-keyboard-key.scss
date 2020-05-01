@@ -1,0 +1,14 @@
+.key {
+  height: 100%;
+  flex-grow: 1;
+  background-color: white;
+  cursor: pointer;
+
+  padding: 0;
+  border: none;
+  outline: 1px solid black;
+
+  &.black {
+    background-color: black;
+  }
+}
