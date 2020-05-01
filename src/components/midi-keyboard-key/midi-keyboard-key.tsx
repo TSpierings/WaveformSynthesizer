@@ -31,10 +31,16 @@ export class MidiKeyboardKey extends React.Component<MidiKeyboardKeyProps, MidiK
     this.props.onToggleNote(state);
   }
 
+  mouseEnter = (event: React.MouseEvent) => {
+    const isLeftMousePressed = (event.nativeEvent.buttons & 1) === 1;
+    this.toggleNote(isLeftMousePressed);
+  }
+
   render() {
     return <button className="key"
       onMouseDown={() => this.toggleNote(true)}
       onMouseUp={() => this.toggleNote(false)}
-      onMouseLeave={() => this.toggleNote(false)}/>
+      onMouseLeave={() => this.toggleNote(false)}
+      onMouseEnter={this.mouseEnter}/>
   }
 }

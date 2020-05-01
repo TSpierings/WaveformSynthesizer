@@ -77,9 +77,7 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
 
   toggleNote(note: number, state: boolean) {
     if (state) {
-      const freq = calculateFrequency(note)
-      console.log(freq);
-      this.audioBufferSourceNode = this.initAudiobufferSource(freq);
+      this.audioBufferSourceNode = this.initAudiobufferSource(calculateFrequency(note));
       this.audioBufferSourceNode.start();
     } else {
       this.audioBufferSourceNode.stop();
@@ -87,7 +85,6 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
   }
 
   parseMidiMessage = (message: any) => {
-    console.log(message);
     const command = message.data[0];
     const note = message.data[1];
     const velocity = message.data.length > 2 ? message[2] : 0;
