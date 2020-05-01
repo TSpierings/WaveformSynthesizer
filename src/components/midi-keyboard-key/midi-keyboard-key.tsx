@@ -1,5 +1,6 @@
 import './midi-keyboard-key.scss';
 import * as React from 'react';
+import { isKeyBlack } from 'util/is-midi-key-black';
 
 interface MidiKeyboardKeyProps {
   onToggleNote: Function,
@@ -11,19 +12,21 @@ interface MidiKeyboardKeyState {
 }
 
 export class MidiKeyboardKey extends React.Component<MidiKeyboardKeyProps, MidiKeyboardKeyState> {
-  private static blackTones = [1, 3, 6, 8, 10];
   private black: boolean;
 
   constructor(props: MidiKeyboardKeyProps) {
     super(props)
 
-    this.black = this.isBlack();
+    this.black = isKeyBlack(this.props.note);
 
     this.state = {
       isActive: false
     }
   }
 
+  /**
+   * Toggle the note to the given state if the state is not the current state.
+   */
   toggleNote = (state: boolean) => {
     if (this.state.isActive === state) {
       return;
@@ -36,14 +39,12 @@ export class MidiKeyboardKey extends React.Component<MidiKeyboardKeyProps, MidiK
     this.props.onToggleNote(state);
   }
 
+  /**
+   * If the mouse enters the button, toggle the note to the left mouse button state.
+   */
   mouseEnter = (event: React.MouseEvent) => {
     const isLeftMousePressed = (event.nativeEvent.buttons & 1) === 1;
     this.toggleNote(isLeftMousePressed);
-  }
-
-  isBlack = () => {
-    const semitone = this.props.note % 12;
-    return MidiKeyboardKey.blackTones.some(k => k === semitone);
   }
 
   render() {
