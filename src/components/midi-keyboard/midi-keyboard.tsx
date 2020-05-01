@@ -6,10 +6,14 @@ interface MidiKeyboardProps {
   onMidiMessage: Function
 }
 
+interface MidiKeyboardState {
+  activeKeys: Array<number>; 
+}
+
 const midiNoteOn = 144;
 const midiNoteOff = 128;
 
-export class MidiKeyboard extends React.Component<MidiKeyboardProps, {}> {
+export class MidiKeyboard extends React.Component<MidiKeyboardProps, MidiKeyboardState> {
   private keyboardKeys: Array<number>;
   private firstKey = 21;
 
@@ -22,13 +26,37 @@ export class MidiKeyboard extends React.Component<MidiKeyboardProps, {}> {
     for(let i = 0; i < 87; i++) {
       this.keyboardKeys[i] = i;
     }
+
+    this.state = {
+      activeKeys: []
+    }
   }
 
   /**
-   * On a MIDI message from one of the attached devices, just send it to the synthesizer.
+   * Publish all MIDI device messages.
    */
   onMidiMessage = (message: WebMidi.MIDIMessageEvent) => {
     this.props.onMidiMessage(message);
+    this.setActiveNotes(message.data[1], message.data[0] === midiNoteOn ? true : false);
+  }
+
+  /**
+   * Add or remove a note from the set of activeNotes.
+   * @param note note to add/remove.
+   * @param on True for adding, false for removing.
+   */
+  setActiveNotes(note: number, on: boolean) {
+    this.setState(state => {
+      let newState = state
+
+      if (on) {
+        newState.activeKeys.push(note)
+      } else {
+        newState.activeKeys.splice(state.activeKeys.findIndex(k => k === note), 1);
+      }
+
+      return newState;
+    })
   }
 
   /**
@@ -36,6 +64,7 @@ export class MidiKeyboard extends React.Component<MidiKeyboardProps, {}> {
    * Will use maximum velocity for the keypress.
    */
   toggleNote = (key: number, state: boolean) => {
+    this.setActiveNotes(key + this.firstKey, state);
     this.props.onMidiMessage({
       data: [
         state ? midiNoteOn : midiNoteOff,
@@ -61,7 +90,10 @@ export class MidiKeyboard extends React.Component<MidiKeyboardProps, {}> {
   render() {
     return <div className="keyboard">
       {this.keyboardKeys.map((key) => 
-        <MidiKeyboardKey key={key} note={key + this.firstKey} onToggleNote={(state: boolean) => this.toggleNote(key, state)}/>
+        <MidiKeyboardKey key={key} 
+          note={key + this.firstKey}
+          isActive={this.state.activeKeys.some(k => k === key + this.firstKey)}
+          onToggleNote={(state: boolean) => this.toggleNote(key, state)}/>
       )}
     </div>
   }

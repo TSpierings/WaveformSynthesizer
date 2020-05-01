@@ -5,53 +5,50 @@ import { isKeyBlack } from 'util/is-midi-key-black';
 interface MidiKeyboardKeyProps {
   onToggleNote: Function,
   note: number;
+  isActive: boolean;
 }
 
-interface MidiKeyboardKeyState {
-  isActive: boolean
-}
-
-export class MidiKeyboardKey extends React.Component<MidiKeyboardKeyProps, MidiKeyboardKeyState> {
+export class MidiKeyboardKey extends React.Component<MidiKeyboardKeyProps, {}> {
   private black: boolean;
 
   constructor(props: MidiKeyboardKeyProps) {
     super(props)
 
     this.black = isKeyBlack(this.props.note);
-
-    this.state = {
-      isActive: false
-    }
   }
 
   /**
    * Toggle the note to the given state if the state is not the current state.
    */
-  toggleNote = (state: boolean) => {
-    if (this.state.isActive === state) {
-      return;
-    }
-
-    this.setState({
-      isActive: state
-    });
-
-    this.props.onToggleNote(state);
+  toggleNote = (on: boolean) => {
+    this.props.onToggleNote(on);
   }
 
   /**
-   * If the mouse enters the button, toggle the note to the left mouse button state.
+   * If the mouse enters the button and the left mousebutton is pressed, toggle the note on.
    */
   mouseEnter = (event: React.MouseEvent) => {
     const isLeftMousePressed = (event.nativeEvent.buttons & 1) === 1;
-    this.toggleNote(isLeftMousePressed);
+    if (isLeftMousePressed) {
+      this.toggleNote(true);
+    }    
+  }
+
+  /**
+   * If the mouse leaves and the left mousebutton is pressed, toggle the note off.
+   */
+  mouseLeave = (event: React.MouseEvent) => {
+    const isLeftMousePressed = (event.nativeEvent.buttons & 1) === 1;
+    if (isLeftMousePressed) {
+      this.toggleNote(false);
+    }
   }
 
   render() {
-    return <button className={`key ${this.black ? 'black' : ''} ${this.state.isActive ? 'active' : ''}`}
+    return <button className={`key ${this.black ? 'black' : ''} ${this.props.isActive ? 'active' : ''}`}
       onMouseDown={() => this.toggleNote(true)}
       onMouseUp={() => this.toggleNote(false)}
-      onMouseLeave={() => this.toggleNote(false)}
+      onMouseLeave={this.mouseLeave}
       onMouseEnter={this.mouseEnter}/>
   }
 }
