@@ -3,6 +3,7 @@ import * as React from 'react';
 import { WaveformEditor } from 'components/waveform-editor/waveform-editor';
 import { initSineWaveform } from 'util/waveform';
 import { MidiKeyboard } from 'components/midi-keyboard/midi-keyboard';
+import { calculateFrequency } from 'util/calculate-frequency';
 
 interface WaveformSynthesizerState {
   waveform: Array<number>;
@@ -24,7 +25,7 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
 
     this.audioContext = new AudioContext();
     this.masterGainNode = this.initMasterGainNode();
-    this.audioBufferSourceNode = this.initAudiobufferSource();
+    this.audioBufferSourceNode = this.audioContext.createBufferSource();
   }
 
   /**
@@ -41,13 +42,12 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
    * Initialize an AudioBufferSourceNode which will be filled with the waveform and played at the desired frequency.
    * It will be connected to the masterGainNode, so that should exist before this function is called.
    */
-  initAudiobufferSource(): AudioBufferSourceNode {
+  initAudiobufferSource(targetFrequency: number): AudioBufferSourceNode {
     const audioBufferSourceNode = this.audioContext.createBufferSource();
     audioBufferSourceNode.connect(this.masterGainNode);
     audioBufferSourceNode.loop = true;
 
     const waveformFrequency = this.audioContext.sampleRate / WaveformSynthesizer.waveBufferLength;
-    const targetFrequency = 261.63;
     audioBufferSourceNode.playbackRate.value = targetFrequency / waveformFrequency;
 
     audioBufferSourceNode.buffer = this.createWaveformBuffer();
@@ -73,15 +73,33 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
     this.setState({
       waveform: waveform
     });
-
-    this.audioBufferSourceNode.stop();
-    this.audioBufferSourceNode.disconnect();
-    this.audioBufferSourceNode = this.initAudiobufferSource();
-    this.audioBufferSourceNode.start();
   }
 
-  playNote = (event: any) => {
-    console.log(event);
+  toggleNote(note: number, state: boolean) {
+    if (state) {
+      const freq = calculateFrequency(note)
+      console.log(freq);
+      this.audioBufferSourceNode = this.initAudiobufferSource(freq);
+      this.audioBufferSourceNode.start();
+    } else {
+      this.audioBufferSourceNode.stop();
+    }
+  }
+
+  parseMidiMessage = (message: any) => {
+    console.log(message);
+    const command = message.data[0];
+    const note = message.data[1];
+    const velocity = message.data.length > 2 ? message[2] : 0;
+
+    switch(command) {
+      case 144:
+        this.toggleNote(note, true);
+        break;
+      case 128:
+        this.toggleNote(note, false);
+        break;
+    }
   }
 
   //#region Lifecycle functions
@@ -106,7 +124,7 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
       <div className='frequency-graph'><label>Frequency graph placeholder</label></div>
       <div className='midi-keyboard'>
         <MidiKeyboard 
-          onPlayNote={this.playNote}/>
+          onMidiMessage={this.parseMidiMessage}/>
       </div>
     </div>;
   }
