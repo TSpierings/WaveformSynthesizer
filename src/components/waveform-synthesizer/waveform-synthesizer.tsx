@@ -4,6 +4,7 @@ import { WaveformEditor } from 'components/waveform-editor/waveform-editor';
 import { initSineWaveform } from 'util/waveform';
 import { MidiKeyboard } from 'components/midi-keyboard/midi-keyboard';
 import { calculateFrequency } from 'util/calculate-frequency';
+import { isNullOrUndefined } from 'util';
 
 interface WaveformSynthesizerState {
   waveform: Array<number>;
@@ -16,6 +17,8 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
   private masterGainNode: GainNode;
   private audioBufferSourceNode: AudioBufferSourceNode;
 
+  private activeNotes: Map<number, AudioBufferSourceNode>;
+
   constructor(props: any) {
     super(props);
 
@@ -23,9 +26,11 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
       waveform: initSineWaveform(WaveformSynthesizer.waveBufferLength)
     }
 
+    this.activeNotes = new Map();
     this.audioContext = new AudioContext();
     this.masterGainNode = this.initMasterGainNode();
     this.audioBufferSourceNode = this.audioContext.createBufferSource();
+    
   }
 
   /**
@@ -77,10 +82,29 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
 
   toggleNote(note: number, state: boolean) {
     if (state) {
-      this.audioBufferSourceNode = this.initAudiobufferSource(calculateFrequency(note));
-      this.audioBufferSourceNode.start();
+      this.activateNote(note);
     } else {
-      this.audioBufferSourceNode.stop();
+      this.disableNote(note);
+    }
+  }
+
+  activateNote(note: number) {
+    const existingNote = this.activeNotes.get(note);
+
+    if (!isNullOrUndefined(existingNote)) {
+      existingNote.stop();
+    }
+
+    const newNote = this.initAudiobufferSource(calculateFrequency(note));
+    newNote.start();
+    this.activeNotes.set(note, newNote);
+  }
+
+  disableNote(note: number) {
+    const existingNote = this.activeNotes.get(note);
+
+    if (!isNullOrUndefined(existingNote)) {
+      existingNote.stop();
     }
   }
 
