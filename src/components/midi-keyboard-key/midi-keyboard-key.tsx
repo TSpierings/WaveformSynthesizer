@@ -47,7 +47,7 @@ export class MidiKeyboardKey extends React.Component<MidiKeyboardKeyProps, MidiK
   }
 
   render() {
-    return <button className={`key ${this.black ? 'black' : ''}`}
+    return <button className={`key ${this.black ? 'black' : ''} ${this.state.isActive ? 'active' : ''}`}
       onMouseDown={() => this.toggleNote(true)}
       onMouseUp={() => this.toggleNote(false)}
       onMouseLeave={() => this.toggleNote(false)}
