@@ -7,18 +7,21 @@ interface MidiKeyboardProps {
 }
 
 interface MidiKeyboardState {
-  activeKeys: Array<number>; 
+  activeKeys: Array<number>;
 }
 
 const midiNoteOn = 144;
 const midiNoteOff = 128;
 
 export class MidiKeyboard extends React.Component<MidiKeyboardProps, MidiKeyboardState> {
+  private keyboardRef: React.RefObject<HTMLDivElement>;
   private keyboardKeys: Array<number>;
   private firstKey = 21;
 
   constructor(props: MidiKeyboardProps) {
     super(props)
+
+    this.keyboardRef = React.createRef();
 
     // It displays 87 keys on the on-screen keyboard by default.
     // TODO: make dynamic for  small devices.
@@ -88,7 +91,8 @@ export class MidiKeyboard extends React.Component<MidiKeyboardProps, MidiKeyboar
   }
 
   render() {
-    return <div className="keyboard">
+    return <div className="keyboard"
+      ref={this.keyboardRef}>
       {this.keyboardKeys.map((key) => 
         <MidiKeyboardKey key={key} 
           note={key + this.firstKey}

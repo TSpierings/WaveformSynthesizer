@@ -58,6 +58,7 @@ export class WaveformEditor extends React.Component<WaveformEditorProps, Wavefor
     const touchY = event.touches[0].clientY - canvas.offsetTop;
   
     this.editWaveform(touchX, touchY);
+    event.stopPropagation();
   }
 
   /**
@@ -72,6 +73,7 @@ export class WaveformEditor extends React.Component<WaveformEditorProps, Wavefor
     const mouseY = event.nativeEvent.offsetY;
 
     this.editWaveform(mouseX, mouseY);
+    event.stopPropagation();
   }
 
   /**

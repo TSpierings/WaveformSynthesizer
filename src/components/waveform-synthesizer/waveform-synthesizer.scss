@@ -1,33 +1,30 @@
 .waveform-synthesizer {
-  display: grid;
-  grid-template-columns: repeat(3, auto);
-  grid-template-rows: 100px 500px repeat(2, auto);
-  height: 100vh;
-  gap: 1px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   background-color: black;
   
   >div {
+    display: flex;
     background-color: white;
+    margin: 1px 0;
   }
   
   .master {
-    grid-column: 1 / span 3;
-    grid-row: 1;
+    height: 100px;
   }
 
   .waveform-editor {
-    grid-column: 2;
-    grid-row: 2;
+    display: flex;
+    justify-content: center;
     background-color: black;
   }
 
   .frequency-graph {
-    grid-column: 1 / span 3;
-    grid-row: 3;
+    flex: 1;
   }
 
   .midi-keyboard {
-    grid-column: 1 / span 3;
-    grid-row: 4;
+    height: 100px;
   }
 }

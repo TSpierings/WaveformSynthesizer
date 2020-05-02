@@ -49,6 +49,8 @@ export class MidiKeyboardKey extends React.Component<MidiKeyboardKeyProps, {}> {
       onMouseDown={() => this.toggleNote(true)}
       onMouseUp={() => this.toggleNote(false)}
       onMouseLeave={this.mouseLeave}
-      onMouseEnter={this.mouseEnter}/>
+      onMouseEnter={this.mouseEnter}
+      onTouchStart={() => this.toggleNote(true)}
+      onTouchEnd={() => this.toggleNote(false)}/>
   }
 }
