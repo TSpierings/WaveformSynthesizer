@@ -63,8 +63,8 @@ export class Knob extends React.Component<KnobProps, KnobState> {
   endInput = () => {
     window.removeEventListener('mousemove', this.mouseMove, true);
     window.removeEventListener('mouseup', this.endInput, true);
-    window.addEventListener('touchmove', this.touchMove, true);
-    window.addEventListener('touchend', this.endInput, true);
+    window.removeEventListener('touchmove', this.touchMove, true);
+    window.removeEventListener('touchend', this.endInput, true);
   }
 
   calculateRotationPercentage(): number {
