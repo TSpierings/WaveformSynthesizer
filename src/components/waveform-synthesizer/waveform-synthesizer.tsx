@@ -7,6 +7,7 @@ import { calculateFrequency } from 'util/calculate-frequency';
 import { isNullOrUndefined } from 'util';
 import { Voice } from 'audio/voice';
 import { MasterMixBar } from 'components/master-mix-bar/master-mix-bar';
+import { HarmonicsEditor } from 'components/harmonics-editor/harmonics-editor';
 
 interface WaveformSynthesizerState {
   waveform: Array<number>;
@@ -143,7 +144,9 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
         <WaveformEditor waveformBuffer={this.state.waveform} 
           onWaveformBufferChange={this.onWaveFormBufferChange}/>
         </div>
-      <div className='frequency-graph'><label>Frequency graph placeholder</label></div>
+      <div className='harmonics-editor'>
+        <HarmonicsEditor />
+      </div>
       
     </div>;
   }
