@@ -21,6 +21,8 @@
   }
 
   .midi-keyboard {
-    height: 100px;
+    position: sticky;
+    top: calc(100vh - 100px);
+    height: 0px;
   }
 }

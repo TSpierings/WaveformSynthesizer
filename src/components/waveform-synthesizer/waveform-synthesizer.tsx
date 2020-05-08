@@ -132,6 +132,10 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
 
   render() {
     return <div className='waveform-synthesizer'>
+      <div className='midi-keyboard'>
+        <MidiKeyboard 
+          onMidiMessage={this.parseMidiMessage}/>
+      </div>
       <div className='master'>
         <MasterMixBar onMasterGainChange={this.setMasterGain}/>
       </div>
@@ -140,10 +144,7 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
           onWaveformBufferChange={this.onWaveFormBufferChange}/>
         </div>
       <div className='frequency-graph'><label>Frequency graph placeholder</label></div>
-      <div className='midi-keyboard'>
-        <MidiKeyboard 
-          onMidiMessage={this.parseMidiMessage}/>
-      </div>
+      
     </div>;
   }
 }
