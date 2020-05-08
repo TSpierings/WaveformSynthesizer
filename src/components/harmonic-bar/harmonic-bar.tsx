@@ -3,7 +3,8 @@ import * as React from 'react';
 import { clamp } from 'util/clamp';
 
 export interface HarmonicBarprops {
-  label: number
+  label: number;
+  onValueChange: Function;
 }
 
 export interface HarmonicBarState {
@@ -34,10 +35,12 @@ export class HarmonicBar extends React.Component<HarmonicBarprops, HarmonicBarSt
       const height = (this.harmonicRef.current as HTMLDivElement).clientHeight * 0.8; // Can only select the top 80% of the harmonic input.
       const input = event.nativeEvent.offsetY;
       const percentage = input / height;
+      const newValue = clamp(1 - percentage, 0, 1); // Clamp to prevent clicks on the bottom 20%.
 
       this.setState({
-        value: clamp(1 - percentage, 0, 100) // Clamp to prevent clicks on the bottom 20%
+        value: newValue
       });
+      this.props.onValueChange(newValue)
     }
     event.preventDefault();
   }
@@ -54,10 +57,12 @@ export class HarmonicBar extends React.Component<HarmonicBarprops, HarmonicBarSt
       const input = event.touches[0].clientY;
       const touchHeight = input - element.offsetTop;
       const percentage = touchHeight / (element.clientHeight * 0.8); // Can only select the top 80% of the harmonic input.
+      const newValue = clamp(1 - percentage, 0, 1) // Clamp to prevent clicks on the bottom 20%.
 
       this.setState({
-        value: clamp(1 - percentage, 0, 100) // Clamp to prevent clicks on the bottom 20%
+        value: newValue
       });
+      this.props.onValueChange(newValue)
     }
   }
 
@@ -76,7 +81,7 @@ export class HarmonicBar extends React.Component<HarmonicBarprops, HarmonicBarSt
       onTouchEnd={this.stopInput}>
       <div className='bar'
         style={
-          { height: `calc(${this.state.value * 80}%`}
+          { height: `calc(${this.state.value * 80}%`} // Times 80 because the value is a percentage and we want to fill 80% of the container.
         }/>
       <label>{this.props.label}</label>
     </div>

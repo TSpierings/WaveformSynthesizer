@@ -2,7 +2,11 @@ import './harmonics-editor.scss';
 import * as React from 'react';
 import { HarmonicBar } from 'components/harmonic-bar/harmonic-bar';
 
-export class HarmonicsEditor extends React.Component<{}, {}> {
+export interface HarmonicsEditorProps {
+  onHarmonicChange: Function;
+}
+
+export class HarmonicsEditor extends React.Component<HarmonicsEditorProps, {}> {
   private harmonics: Array<number>;
 
   constructor(props: any) {
@@ -17,7 +21,8 @@ export class HarmonicsEditor extends React.Component<{}, {}> {
   render() {
     return <div className='harmonics-editor'>
       {this.harmonics.map((harmonic) => 
-        <HarmonicBar key={harmonic} label={harmonic}/>
+        <HarmonicBar key={harmonic} label={harmonic}
+          onValueChange={(gain: number) => this.props.onHarmonicChange(harmonic, gain)}/>
         )}
     </div>
   }
