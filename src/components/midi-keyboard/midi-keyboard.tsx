@@ -81,13 +81,15 @@ export class MidiKeyboard extends React.Component<MidiKeyboardProps, MidiKeyboar
    * On load attach a handler for midi events to every midi device.
    */
   componentWillMount() {
-    navigator.requestMIDIAccess().then((midiAccess) => {
-      midiAccess.inputs.forEach(device => {
-        device.onmidimessage = this.onMidiMessage;
+    if (navigator.requestMIDIAccess) {
+      navigator.requestMIDIAccess().then((midiAccess) => {
+        midiAccess.inputs.forEach(device => {
+          device.onmidimessage = this.onMidiMessage;
+        });
+      }, (error) => {
+        console.log(error);
       });
-    }, (error) => {
-      console.log(error);
-    });
+    }
   }
 
   render() {
