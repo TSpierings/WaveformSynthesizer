@@ -6,6 +6,7 @@ import { MidiKeyboard } from 'components/midi-keyboard/midi-keyboard';
 import { calculateFrequency } from 'util/calculate-frequency';
 import { isNullOrUndefined } from 'util';
 import { Voice } from 'audio/voice';
+import { MasterMixBar } from 'components/master-mix-bar/master-mix-bar';
 
 interface WaveformSynthesizerState {
   waveform: Array<number>;
@@ -38,7 +39,7 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
    */
   initMasterGainNode(): GainNode {
     const gainNode = this.audioContext.createGain();
-    gainNode.gain.value = 0.1;
+    gainNode.gain.value = 0.5;
     gainNode.connect(this.audioContext.destination);
     return gainNode;
   }
@@ -113,6 +114,10 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
     }
   }
 
+  setMasterGain = (value: number) => {
+    this.masterGainNode.gain.value = value / 100;
+  }
+
   //#region Lifecycle functions
   componentDidMount() {
     this.audioBufferSourceNode.start();
@@ -127,7 +132,9 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
 
   render() {
     return <div className='waveform-synthesizer'>
-      <div className='master'><label>Master mix bar placeholder</label></div>
+      <div className='master'>
+        <MasterMixBar onMasterGainChange={this.setMasterGain}/>
+      </div>
       <div className='waveform-editor'>
         <WaveformEditor waveformBuffer={this.state.waveform} 
           onWaveformBufferChange={this.onWaveFormBufferChange}/>
