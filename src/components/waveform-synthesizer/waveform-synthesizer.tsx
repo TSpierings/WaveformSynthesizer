@@ -5,6 +5,7 @@ import { initSineWaveform } from 'util/waveform';
 import { MidiKeyboard } from 'components/midi-keyboard/midi-keyboard';
 import { calculateFrequency } from 'util/calculate-frequency';
 import { isNullOrUndefined } from 'util';
+import { Voice } from 'audio/voice';
 
 interface WaveformSynthesizerState {
   waveform: Array<number>;
@@ -17,7 +18,7 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
   private masterGainNode: GainNode;
   private audioBufferSourceNode: AudioBufferSourceNode;
 
-  private activeNotes: Map<number, AudioBufferSourceNode>;
+  private activeNotes: Map<number, Array<Voice>>;
 
   constructor(props: any) {
     super(props);
@@ -30,7 +31,6 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
     this.audioContext = new AudioContext();
     this.masterGainNode = this.initMasterGainNode();
     this.audioBufferSourceNode = this.audioContext.createBufferSource();
-    
   }
 
   /**
@@ -44,70 +44,60 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
   }
 
   /**
-   * Initialize an AudioBufferSourceNode which will be filled with the waveform and played at the desired frequency.
-   * It will be connected to the masterGainNode, so that should exist before this function is called.
+   * When the waveform changes, save it to the state.
    */
-  initAudiobufferSource(targetFrequency: number): AudioBufferSourceNode {
-    const audioBufferSourceNode = this.audioContext.createBufferSource();
-    audioBufferSourceNode.connect(this.masterGainNode);
-    audioBufferSourceNode.loop = true;
-
-    const waveformFrequency = this.audioContext.sampleRate / WaveformSynthesizer.waveBufferLength;
-    audioBufferSourceNode.playbackRate.value = targetFrequency / waveformFrequency;
-
-    audioBufferSourceNode.buffer = this.createWaveformBuffer();
-
-    return audioBufferSourceNode;
-  }
-
-  /**
-   * Create an AudioBuffer from the waveform in state.
-   */
-  createWaveformBuffer(): AudioBuffer {
-    const buffer = this.audioContext.createBuffer(1, WaveformSynthesizer.waveBufferLength, this.audioContext.sampleRate);
-    const bufferData = buffer.getChannelData(0);
-
-    for (let i = 0; i < WaveformSynthesizer.waveBufferLength; i++) {
-      bufferData[i] = this.state.waveform[i];
-    }
-
-    return buffer;
-  }
-
   onWaveFormBufferChange = (waveform: Array<number>) => {
     this.setState({
       waveform: waveform
     });
   }
 
-  toggleNote(note: number, state: boolean) {
-    if (state) {
+  /**
+   * Toggle the given note on/off.
+   */
+  toggleNote(note: number, on: boolean) {
+    if (on) {
       this.activateNote(note);
     } else {
       this.disableNote(note);
     }
   }
 
+  /**
+   * Activate a given note, creating and starting all voices for that note.
+   */
   activateNote(note: number) {
-    const existingNote = this.activeNotes.get(note);
+    const voices = this.activeNotes.get(note);
 
-    if (!isNullOrUndefined(existingNote)) {
-      existingNote.stop();
+    if (!isNullOrUndefined(voices)) {
+      voices.forEach(voice => voice.stop());
     }
 
-    const newNote = this.initAudiobufferSource(calculateFrequency(note));
-    newNote.start();
-    this.activeNotes.set(note, newNote);
+    const harmonicVoices = new Array<Voice>();
+    const frequency = calculateFrequency(note);
+    for(let i = 1; i <= 12; i++) {
+      const voice = new Voice(frequency * i, 1 / i, this.state.waveform, this.masterGainNode, this.audioContext);
+      harmonicVoices.push(voice);
+    }
+
+    this.activeNotes.set(note, harmonicVoices);
   }
 
+  /**
+   * Stop a playing note.
+   */
   disableNote(note: number) {
-    const existingNote = this.activeNotes.get(note);
+    const voices = this.activeNotes.get(note);
 
-    if (!isNullOrUndefined(existingNote)) {
-      existingNote.stop();
+    if (!isNullOrUndefined(voices)) {
+      voices.forEach(voice => voice.stop());
     }
   }
 
+  /**
+   * Parse a midi message.
+   * Currently only supports toggling a note on/off.
+   */
   parseMidiMessage = (message: any) => {
     const command = message.data[0];
     const note = message.data[1];
