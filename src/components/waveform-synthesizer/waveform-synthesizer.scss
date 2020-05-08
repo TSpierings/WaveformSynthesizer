@@ -10,15 +10,23 @@
     margin: 1px 0;
   }
 
-  .waveform-editor {
+  .waveform-editor-container {
     display: flex;
     justify-content: center;
     background-color: black;
   }
 
-  .midi-keyboard {
+  .midi-keyboard-container {
     position: sticky;
     top: calc(100vh - 100px);
     height: 0px;
+  }
+
+  .harmonics-editor-container {
+    flex: 1;
+  }
+
+  .spacer {
+    height: 100px;
   }
 }

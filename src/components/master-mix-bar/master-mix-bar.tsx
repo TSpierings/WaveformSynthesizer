@@ -11,7 +11,7 @@ export class MasterMixBar extends React.Component<MasterMixBarProps, {}> {
   render() {
     return <div className='master-mix-bar'>
       <h1>Waveform Synthesizer</h1>
-      <Knob min={0} max={100} default={50} name='master' onValueChange={this.props.onMasterGainChange}/>
+      <Knob min={0} max={100} default={20} name='master' onValueChange={this.props.onMasterGainChange}/>
     </div>
   }
 }

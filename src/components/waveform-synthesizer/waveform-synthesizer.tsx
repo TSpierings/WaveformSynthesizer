@@ -19,8 +19,8 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
   private audioContext: AudioContext;
   private masterGainNode: GainNode;
   private audioBufferSourceNode: AudioBufferSourceNode;
-
   private activeNotes: Map<number, Array<Voice>>;
+  private harmonics: Map<number, number>;
 
   constructor(props: any) {
     super(props);
@@ -30,6 +30,8 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
     }
 
     this.activeNotes = new Map();
+    this.harmonics = new Map();
+    this.harmonics.set(1, 1);
     this.audioContext = new AudioContext();
     this.masterGainNode = this.initMasterGainNode();
     this.audioBufferSourceNode = this.audioContext.createBufferSource();
@@ -40,7 +42,7 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
    */
   initMasterGainNode(): GainNode {
     const gainNode = this.audioContext.createGain();
-    gainNode.gain.value = 0.5;
+    gainNode.gain.value = 0.2;
     gainNode.connect(this.audioContext.destination);
     return gainNode;
   }
@@ -66,7 +68,7 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
   }
 
   /**
-   * Activate a given note, creating and starting all voices for that note.
+   * Activate a given note, creating and starting all voices (harmonics) for that note.
    */
   activateNote(note: number) {
     const voices = this.activeNotes.get(note);
@@ -77,10 +79,13 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
 
     const harmonicVoices = new Array<Voice>();
     const frequency = calculateFrequency(note);
-    for(let i = 1; i <= 12; i++) {
-      const voice = new Voice(frequency * i, 1 / i, this.state.waveform, this.masterGainNode, this.audioContext);
-      harmonicVoices.push(voice);
-    }
+
+    this.harmonics.forEach((gain, harmonic) => {
+      if (gain > 0) {
+        const voice = new Voice(frequency * harmonic, gain, this.state.waveform, this.masterGainNode, this.audioContext);
+        harmonicVoices.push(voice);
+      }
+    });
 
     this.activeNotes.set(note, harmonicVoices);
   }
@@ -119,6 +124,10 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
     this.masterGainNode.gain.value = value / 100;
   }
 
+  setHarmonic = (harmonic: number, gain: number) => {
+    this.harmonics.set(harmonic, gain);
+  }
+
   //#region Lifecycle functions
   componentDidMount() {
     this.audioBufferSourceNode.start();
@@ -133,21 +142,21 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
 
   render() {
     return <div className='waveform-synthesizer'>
-      <div className='midi-keyboard'>
+      <div className='midi-keyboard-container'>
         <MidiKeyboard 
           onMidiMessage={this.parseMidiMessage}/>
       </div>
-      <div className='master'>
+      <div className='master-container'>
         <MasterMixBar onMasterGainChange={this.setMasterGain}/>
       </div>
-      <div className='waveform-editor'>
+      <div className='waveform-editor-container'>
         <WaveformEditor waveformBuffer={this.state.waveform} 
           onWaveformBufferChange={this.onWaveFormBufferChange}/>
         </div>
-      <div className='harmonics-editor'>
-        <HarmonicsEditor />
+      <div className='harmonics-editor-container'>
+        <HarmonicsEditor onHarmonicChange={this.setHarmonic}/>
       </div>
-      
+      <div className='spacer'/>
     </div>;
   }
 }
