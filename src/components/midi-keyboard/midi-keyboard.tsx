@@ -16,22 +16,23 @@ const midiNoteOff = 128;
 export class MidiKeyboard extends React.Component<MidiKeyboardProps, MidiKeyboardState> {
   private keyboardRef: React.RefObject<HTMLDivElement>;
   private keyboardKeys: Array<number>;
-  private firstKey = 21;
+  private currentOctave = 2;
 
   constructor(props: MidiKeyboardProps) {
     super(props)
 
     this.keyboardRef = React.createRef();
-
-    // It displays 87 keys on the on-screen keyboard by default.
-    // TODO: make dynamic for  small devices.
-    this.keyboardKeys = new Array(87);
-    for(let i = 0; i < 87; i++) {
-      this.keyboardKeys[i] = i;
-    }
+    this.keyboardKeys = new Array();
 
     this.state = {
       activeKeys: []
+    }
+  }
+
+  setKeys(count: number) {
+    this.keyboardKeys = new Array(count);
+    for(let i = 0; i < count; i++) {
+      this.keyboardKeys[i] = i;
     }
   }
 
@@ -67,11 +68,11 @@ export class MidiKeyboard extends React.Component<MidiKeyboardProps, MidiKeyboar
    * Will use maximum velocity for the keypress.
    */
   toggleNote = (key: number, state: boolean) => {
-    this.setActiveNotes(key + this.firstKey, state);
+    this.setActiveNotes(key + this.currentOctave * 12, state);
     this.props.onMidiMessage({
       data: [
         state ? midiNoteOn : midiNoteOff,
-        key + this.firstKey, // 21 is the first note on our keyboard (C0).
+        key + this.currentOctave * 12,
         127 // Max velocity.
       ]
     });
@@ -92,13 +93,22 @@ export class MidiKeyboard extends React.Component<MidiKeyboardProps, MidiKeyboar
     }
   }
 
+  componentDidMount() {
+    const keyboard = this.keyboardRef.current as HTMLDivElement;
+    const octaves = Math.ceil(keyboard.offsetWidth / 240);
+    this.currentOctave = 6 - Math.floor(octaves / 2);
+    this.setKeys(octaves * 12);
+    this.setState({})
+  }
+
   render() {
     return <div className="keyboard"
-      ref={this.keyboardRef}>
+      ref={this.keyboardRef}
+      >
       {this.keyboardKeys.map((key) => 
         <MidiKeyboardKey key={key} 
-          note={key + this.firstKey}
-          isActive={this.state.activeKeys.some(k => k === key + this.firstKey)}
+          note={key + this.currentOctave * 12}
+          isActive={this.state.activeKeys.some(k => k === key + this.currentOctave * 12)}
           onToggleNote={(state: boolean) => this.toggleNote(key, state)}/>
       )}
     </div>
