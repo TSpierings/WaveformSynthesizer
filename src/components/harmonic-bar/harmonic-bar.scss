@@ -7,6 +7,7 @@
   border: 1px solid black;
   overflow: hidden;
   user-select: none;
+  cursor: pointer;
 
   &.disabled {
     .bar, label {

@@ -30,6 +30,11 @@ export class HarmonicBar extends React.Component<HarmonicBarprops, HarmonicBarSt
     this.mouseMove(event);
   }
 
+  /**
+   * When editing mode is active and the mouse moves over the element, calculate the offset from the bottom of the element
+   * and set that as the new value.
+   * If the user touches the bottom 20% of the element, the value is set to 0.
+   */
   mouseMove = (event: React.MouseEvent) => {
     if (this.isEditing) {
       const height = (this.harmonicRef.current as HTMLDivElement).clientHeight * 0.8; // Can only select the top 80% of the harmonic input.
@@ -50,6 +55,11 @@ export class HarmonicBar extends React.Component<HarmonicBarprops, HarmonicBarSt
     this.touchMove(event);
   }
 
+  /**
+   * When editing mode is active and the user moves his finger over the screen, calculate the offset of the touch
+   * from the bottom of the element and use it as the new value.
+   * If the user touches the bottom 20% of the element, the value is set to 0.
+   */
   touchMove = (event: React.TouchEvent) => {
     if (this.isEditing) {
       const element = this.harmonicRef.current as HTMLDivElement;
