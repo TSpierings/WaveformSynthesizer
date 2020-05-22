@@ -39,6 +39,7 @@ export class WaveformEditor extends React.Component<WaveformEditorProps, Wavefor
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.moveTo(0, canvas.height / 2);
     ctx.beginPath();
+    ctx.lineWidth = 3;
 
     for(let i = 0; i < waveformBuffer.length; i++) {
       ctx.lineTo(i * (canvas.width / (waveformBuffer.length - 1)),
