@@ -81,6 +81,16 @@ export class HarmonicBar extends React.Component<HarmonicBarprops, HarmonicBarSt
   }
 
   render() {
+    const value = this.props.label;
+
+    let label = <label>{value}</label>
+    if (value < 0) {
+      label = <label className='fraction'>
+                <span>1</span>
+                <span>{Math.abs(value)}</span>
+              </label>
+    }
+
     return <div ref={this.harmonicRef} className={`harmonic ${this.state.value === 0 ? 'disabled' : ''}`}
       onMouseDown={this.mouseDown}
       onMouseMove={this.mouseMove}
@@ -92,8 +102,8 @@ export class HarmonicBar extends React.Component<HarmonicBarprops, HarmonicBarSt
       <div className='bar'
         style={
           { height: `calc(${this.state.value * 80}%`} // Times 80 because the value is a percentage and we want to fill 80% of the container.
-        }/>
-      <label>{this.props.label}</label>
+        }/>      
+      {label}
     </div>
   }
 }

@@ -82,7 +82,10 @@ export class WaveformSynthesizer extends React.Component<{}, WaveformSynthesizer
 
     this.harmonics.forEach((gain, harmonic) => {
       if (gain > 0) {
-        const voice = new Voice(frequency * harmonic, gain, this.state.waveform, this.masterGainNode, this.audioContext);
+        // Calculate the frequency of the (sub)harmonic
+        const harmonicFrequency = harmonic > 0 ? frequency * harmonic : frequency / Math.abs(harmonic);
+
+        const voice = new Voice(harmonicFrequency, gain, this.state.waveform, this.masterGainNode, this.audioContext);
         harmonicVoices.push(voice);
       }
     });
